@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        :root { --gold: #b3782b; --header-wa: #075E54; }
+        body { margin: 0; font-family: sans-serif; background: #f0f2f5; }
+        .header { background: var(--header-wa); color: white; padding: 20px; font-size: 22px; font-weight: bold; }
+        
+        .user-list { background: white; min-height: 100vh; }
+        .user-row { display: flex; align-items: center; padding: 20px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .user-icon { width: 55px; height: 55px; border-radius: 50%; background: #ccc; margin-right: 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; }
+        .user-info strong { font-size: 19px; display: block; }
+
+        #chat-window { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; flex-direction: column; }
+        .chat-head { background: #eee; padding: 15px; display: flex; align-items: center; gap: 15px; font-size: 18px; font-weight: bold; border-bottom: 1px solid #ddd; }
+        #admin-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .bubble { padding: 14px 18px; border-radius: 20px; max-width: 80%; font-size: 17px; }
+        .u-msg { align-self: flex-start; background: #e9e9e9; }
+        .a-msg { align-self: flex-end; background: var(--gold); color: white; }
+
+        .admin-footer { padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: #fff; }
+        input { flex: 1; padding: 15px; border-radius: 30px; border: 1px solid #ddd; outline: none; font-size: 17px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">Support Admin Inbox</div>
+    <div class="user-list">
+        <div class="user-row" onclick="openChat('8235864550')">
+            <div class="user-icon"><i class="fas fa-user-circle"></i></div>
+            <div class="user-info">
+                <strong>Erfan Ahmed (8235864550)</strong>
+                <span style="color: #888;">মেসেজ দেখতে এখানে ক্লিক করুন</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="chat-window">
+        <div class="chat-head">
+            <i class="fas fa-arrow-left" onclick="document.getElementById('chat-window').style.display='none'"></i>
+            <span>Chat: Erfan Ahmed</span>
+        </div>
+        <div id="admin-messages"></div>
+        <div class="admin-footer">
+            <input type="text" id="aReply" placeholder="আপনার উত্তর লিখুন...">
+            <button onclick="sendReply()" style="border:none; background:none; color:var(--gold); font-size: 30px;"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        let tid = "";
+        function openChat(id) {
+            tid = id;
+            document.getElementById('chat-window').style.display = 'flex';
+            loadMsgs();
+        }
+        function sendReply() {
+            let input = document.getElementById('aReply');
+            if(!input.value.trim()) return;
+            let chats = JSON.parse(localStorage.getItem('chat_'+tid)) || [];
+            chats.push({ text: input.value, type: 'received' }); // ইউজারের কাছে এটি received হিসেবে যাবে
+            localStorage.setItem('chat_'+tid, JSON.stringify(chats));
+            input.value = "";
+            loadMsgs();
+        }
+        function loadMsgs() {
+            let flow = document.getElementById('admin-messages');
+            let chats = JSON.parse(localStorage.getItem('chat_'+tid)) || [];
+            flow.innerHTML = chats.map(c => `<div class="bubble ${c.type === 'sent' ? 'u-msg' : 'a-msg'}">${c.text}</div>`).join('');
+            flow.scrollTop = flow.scrollHeight;
+        }
+        setInterval(() => { if(tid) loadMsgs(); }, 1000);
+    </script>
+</body>
+</html>
+          
